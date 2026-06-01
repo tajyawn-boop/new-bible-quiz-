@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>성경 퀴즈쇼 — 하나님 나라</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --purple:#534AB7;--purple-light:#EEEDFE;--purple-dark:#3C3489;
+  --teal:#0F6E56;--coral:#D85A30;--amber:#BA7517;--amber-light:#FAEEDA;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Noto Sans KR','Nunito',sans-serif;background:#f7f5ff;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:16px;}
+#app{width:100%;max-width:480px;background:#fff;border-radius:24px;padding:24px 20px;box-shadow:0 8px 40px rgba(83,74,183,0.12);min-height:90vh;}
+.screen{display:none;}.screen.active{display:block;}
+.hero{text-align:center;padding:1.5rem 0 1rem;}
+.hero-icon{font-size:52px;margin-bottom:8px;}
+.hero-title{font-size:28px;font-weight:900;color:var(--purple);letter-spacing:1px;}
+.hero-badge{display:inline-block;background:var(--amber-light);color:var(--amber);font-size:12px;font-weight:700;padding:4px 14px;border-radius:999px;margin-top:8px;}
+.btn{display:block;width:100%;padding:14px;border-radius:14px;border:none;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;transition:transform 0.1s;margin-bottom:10px;}
+.btn:active{transform:scale(0.97);}
+.btn.purple{background:var(--purple);color:#fff;}.btn.purple:hover{background:var(--purple-dark);}
+.btn.teal{background:var(--teal);color:#fff;}
+.btn.coral{background:var(--coral);color:#fff;}
+.btn.outline{background:transparent;color:var(--purple);border:2px solid var(--purple-light);}
+.card{background:#fff;border:1.5px solid #ece9ff;border-radius:16px;padding:20px;margin-bottom:14px;}
+input{width:100%;padding:12px 14px;border:1.5px solid #ece9ff;border-radius:12px;font-size:16px;font-family:inherit;background:#faf9ff;color:#222;margin-bottom:12px;outline:none;transition:border-color 0.2s;}
+input:focus{border-color:var(--purple);}
+.room-code{font-size:48px;font-weight:900;color:var(--purple);text-align:center;letter-spacing:12px;padding:1rem 0;font-family:'Nunito',sans-serif;}
+.avatar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px;}
+.av-card{border:2.5px solid #ece9ff;border-radius:16px;padding:10px 4px;text-align:center;cursor:pointer;transition:all 0.15s;background:#fff;}
+.av-card:hover{transform:scale(1.04);}
+.av-card.selected{border-color:var(--purple);background:var(--purple-light);}
+.av-sprite{font-size:28px;margin-bottom:4px;}
+.av-name{font-size:12px;font-weight:700;color:#333;}
+.av-tag{font-size:9px;color:#888;margin-top:2px;line-height:1.3;}
+.chip{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;margin:3px;}
+.timer-wrap{background:#f0eeff;border-radius:999px;height:12px;margin-bottom:14px;overflow:hidden;}
+.timer-fill{height:12px;border-radius:999px;transition:width 0.1s linear;}
+.q-header{border-radius:20px;padding:20px;text-align:center;margin-bottom:14px;}
+.q-num-badge{display:inline-block;font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:10px;}
+.q-text{font-size:17px;font-weight:700;color:#fff;line-height:1.5;}
+.q-ref{font-size:12px;margin-top:8px;color:rgba(255,255,255,0.75);}
+.ans-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.ans-btn{padding:18px 10px;border-radius:16px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;border:none;text-align:center;color:#fff;line-height:1.4;transition:transform 0.1s;}
+.ans-btn:active{transform:scale(0.96);}
+.ans-btn .sym{font-size:22px;display:block;margin-bottom:4px;}
+.ans-btn.correct{outline:4px solid #3B6D11 !important;background:#27500A !important;}
+.ans-btn.wrong{opacity:0.3 !important;}
+.ans-btn.disabled{pointer-events:none;}
+.feedback-box{text-align:center;padding:14px;border-radius:14px;font-size:18px;font-weight:800;margin-top:8px;}
+.lb-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;margin-bottom:8px;}
+.lb-rank{font-size:22px;min-width:32px;}
+.lb-sprite{font-size:24px;}
+.lb-name{flex:1;font-size:15px;font-weight:700;color:#222;}
+.lb-score{font-size:15px;font-weight:800;color:var(--purple);}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:14px;margin:1.5rem 0;}
+.pd-col{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.pd-block{width:78px;border-radius:12px 12px 0 0;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.pd-name{font-size:12px;font-weight:700;color:#333;text-align:center;max-width:80px;}
+.pd-pts{font-size:11px;color:#888;}
+.deco-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:1.5rem;opacity:0.75;}
+.deco-av{text-align:center;background:#faf9ff;border-radius:14px;padding:10px 6px;border:1.5px solid #ece9ff;}
+.error-box{background:#FCEBEB;color:#A32D2D;border-radius:12px;padding:12px 16px;font-size:14px;margin-bottom:12px;font-weight:600;}
+.mute-btn{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;border:none;background:var(--purple);color:#fff;font-size:20px;cursor:pointer;box-shadow:0 4px 16px rgba(83,74,183,0.3);z-index:999;display:flex;align-items:center;justify-content:center;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<div id="s-role" class="screen active">
+  <div class="hero">
+    <div class="hero-icon">✝</div>
+    <div class="hero-title">성경 퀴즈쇼</div>
+    <div class="hero-badge">하나님 나라, 하나님의 방식으로 ✦</div>
+  </div>
+  <div id="deco-row" class="deco-row"></div>
+  <div style="margin-top:1.5rem;">
+    <button class="btn purple" onclick="goHostSetup()">방 만들기 (진행자)</button>
+    <button class="btn teal" onclick="showS('s-join')">게임 참가하기</button>
+  </div>
+</div>
+
+<div id="s-host-setup" class="screen">
+  <div class="hero">
+    <div class="hero-title" style="font-size:20px;">방 대기실</div>
+    <div class="hero-badge">참가자들에게 코드를 알려주세요</div>
+  </div>
+  <div class="card" style="text-align:center;border-color:#CECBF6;">
+    <div style="font-size:13px;font-weight:700;color:var(--purple);margin-bottom:4px;">방 코드</div>
+    <div class="room-code" id="host-code">—</div>
+  </div>
+  <div class="card">
+    <div style="font-size:14px;font-weight:700;margin-bottom:10px;">참가자 목록</div>
+    <div id="host-players" style="display:flex;flex-wrap:wrap;gap:4px;min-height:36px;"><span style="color:#aaa;font-size:13px;">아직 아무도 없어요...</span></div>
+  </div>
+  <div id="host-error"></div>
+  <div style="display:flex;gap:10px;">
+    <button class="btn outline" onclick="showS('s-role')" style="width:auto;padding:12px 20px;">뒤로</button>
+    <button class="btn purple" style="flex:1;" onclick="hostStart()">게임 시작!</button>
+  </div>
+</div>
+
+<div id="s-join" class="screen">
+  <div class="hero"><div class="hero-title" style="font-size:20px;">게임 참가</div></div>
+  <div class="card">
+    <div id="join-error"></div>
+    <input id="in-code" placeholder="방 코드 입력" maxlength="6" style="text-align:center;font-size:24px;letter-spacing:8px;text-transform:uppercase;font-weight:800;"/>
+    <input id="in-name" placeholder="이름 (예: 다니엘)" maxlength="10"/>
+    <button class="btn purple" onclick="toAvatar()">다음 →</button>
+  </div>
+  <button class="btn outline" onclick="showS('s-role')">뒤로</button>
+</div>
+
+<div id="s-avatar" class="screen">
+  <div class="hero">
+    <div class="hero-title" style="font-size:20px;">캐릭터 선택</div>
+    <div class="hero-badge">함께할 성경 인물을 골라보세요</div>
+  </div>
+  <div class="avatar-grid" id="av-grid"></div>
+  <div id="avatar-error"></div>
+  <button class="btn purple" onclick="joinRoom()">참가하기!</button>
+</div>
+
+<div id="s-wait" class="screen">
+  <div class="hero">
+    <div id="wait-sprite" style="font-size:64px;text-align:center;margin-bottom:8px;"></div>
+    <div class="hero-title" style="font-size:20px;" id="wait-name"></div>
+    <div class="hero-badge">진행자가 시작할 때까지 기다려요...</div>
+  </div>
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;color:#888;margin-bottom:10px;">같은 방 친구들</div>
+    <div id="wait-players" style="display:flex;flex-wrap:wrap;gap:4px;"></div>
+  </div>
+</div>
+
+<div id="s-q" class="screen">
+  <div class="timer-wrap"><div class="timer-fill" id="t-bar" style="width:100%;background:var(--purple);"></div></div>
+  <div class="q-header" id="q-header">
+    <div class="q-num-badge" id="q-num"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-ref" id="q-ref"></div>
+  </div>
+  <div class="ans-grid" id="ans-grid"></div>
+  <div id="fb-box"></div>
+</div>
+
+<div id="s-lb" class="screen">
+  <div class="hero">
+    <div class="hero-title" style="font-size:20px;">중간 순위 🏅</div>
+    <div class="hero-badge" id="lb-sub"></div>
+  </div>
+  <div id="lb-list"></div>
+  <div style="text-align:center;margin-top:1rem;">
+    <button class="btn purple" id="lb-btn" style="display:none;" onclick="nextQ()"></button>
+  </div>
+</div>
+
+<div id="s-final" class="screen">
+  <div class="hero">
+    <div class="hero-icon">🏆</div>
+    <div class="hero-title">최종 결과!</div>
+    <div class="hero-badge">수고했어요, 하나님 나라 챔피언!</div>
+  </div>
+  <div class="podium" id="podium"></div>
+  <div id="final-list"></div>
+  <div style="text-align:center;margin-top:1.5rem;">
+    <button class="btn coral" onclick="restart()">다시 시작</button>
+  </div>
+</div>
+
+</div>
+<button class="mute-btn" id="mute-btn" onclick="toggleMute()">🔊</button>
+
+<script>
+// Global error surfacer — shows any script failure on-screen instead of a dead page
+window.addEventListener('error', function(e){
+  var b = document.getElementById('fatal-err');
+  if(!b){ b=document.createElement('div'); b.id='fatal-err';
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#712B13;color:#fff;font:12px sans-serif;padding:10px;white-space:pre-wrap;';
+    document.body.appendChild(b); }
+  b.textContent = '⚠ 오류: ' + (e.message || e.error || '알 수 없는 오류') +
+    '\n인터넷 연결 또는 Firebase 로딩을 확인해주세요.';
+});
+
+// Immediate fallbacks so buttons NEVER throw "not defined" even before the module loads.
+// These are replaced by the real functions once Firebase is ready.
+window.showS = function(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  var el = document.getElementById(id); if (el) el.classList.add('active');
+};
+function notReady(){
+  alert('아직 준비 중이에요. 잠시 후 다시 눌러주세요.\n(인터넷 연결을 확인해주세요.)');
+}
+window.goHostSetup = notReady;
+window.toAvatar    = notReady;
+window.joinRoom    = notReady;
+window.hostStart   = notReady;
+window.submitAns   = notReady;
+window.nextQ       = notReady;
+window.pickAv      = function(){};
+window.toggleMute  = function(){};
+window.restart     = function(){ window.showS('s-role'); };
+</script>
+<script type="module">
+let initializeApp, getDatabase, ref, set, get, onValue, update;
+
+// Try multiple CDNs — if one is blocked (e.g. gstatic on filtered Wi-Fi), fall back to others.
+const CDN_SETS = [
+  { app: "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js",
+    db:  "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js" },
+  { app: "https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-app.js",
+    db:  "https://cdn.jsdelivr.net/npm/firebase@10.12.2/firebase-database.js" },
+  { app: "https://esm.sh/firebase@10.12.2/app",
+    db:  "https://esm.sh/firebase@10.12.2/database" },
+];
+
+let loaded = false, lastErr = null;
+for (const set_ of CDN_SETS) {
+  try {
+    const appMod = await import(set_.app);
+    const dbMod  = await import(set_.db);
+    initializeApp = appMod.initializeApp;
+    ({ getDatabase, ref, set, get, onValue, update } = dbMod);
+    loaded = true;
+    break;
+  } catch (err) { lastErr = err; }
+}
+
+if (!loaded) {
+  document.body.insertAdjacentHTML('beforeend',
+    '<div style="position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#712B13;color:#fff;font:13px sans-serif;padding:12px;line-height:1.5;">'+
+    '⚠ Firebase를 어떤 서버에서도 불러오지 못했어요.<br>'+
+    '• 이 파일을 휴대폰에서 직접 여는 대신 <b>인터넷 주소(https://)</b>로 열어주세요 (예: GitHub Pages).<br>'+
+    '• 학교/교회 와이파이나 광고 차단 앱이 google.com을 막고 있을 수 있어요. <b>데이터(LTE/5G)</b>로 시도해보세요.<br>'+
+    '<small style="opacity:.8">'+(lastErr && lastErr.message ? lastErr.message : lastErr)+'</small></div>');
+  throw lastErr || new Error('Firebase load failed');
+}
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAEUPqyGWP91ylhZdffQjm419G-d-F4Fz4",
+  authDomain: "suryeonhoe-quiz.firebaseapp.com",
+  databaseURL: "https://suryeonhoe-quiz-default-rtdb.firebaseio.com",
+  projectId: "suryeonhoe-quiz",
+  storageBucket: "suryeonhoe-quiz.firebasestorage.app",
+  messagingSenderId: "562764709026",
+  appId: "1:562764709026:web:9229dd41b6ccb73d34abfb"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db = getDatabase(fbApp);
+
+// ── CONNECTION STATUS ─────────────────────────────────────
+onValue(ref(db, '.info/connected'), function(snap) {
+  const ok = snap.val() === true;
+  let badge = document.getElementById('conn-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'conn-badge';
+    badge.style.cssText = 'position:fixed;top:8px;left:8px;z-index:9999;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;font-family:sans-serif;';
+    document.body.appendChild(badge);
+  }
+  if (ok) { badge.textContent = '● 온라인'; badge.style.cssText += 'background:#EAF3DE;color:#27500A;'; setTimeout(function(){ if(badge) badge.style.display='none'; }, 2000); }
+  else { badge.style.display='block'; badge.textContent = '● 연결 끊김'; badge.style.cssText += 'background:#FAECE7;color:#712B13;'; }
+});
+
+// ── AUDIO ENGINE ──────────────────────────────────────────
+const Audio = {
+  ctx: null, muted: false, gainNode: null, loopId: null,
+
+  init() {
+    if (this.ctx) return;
+    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.gainNode = this.ctx.createGain();
+    this.gainNode.gain.value = 0.18;
+    this.gainNode.connect(this.ctx.destination);
+  },
+
+  note(freq, start, dur, vol, type) {
+    if (this.muted || !this.ctx) return;
+    vol = vol || 0.15; type = type || 'square';
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.connect(g); g.connect(this.gainNode);
+    o.type = type; o.frequency.value = freq;
+    const t = this.ctx.currentTime + start;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.start(t); o.stop(t + dur + 0.05);
+  },
+
+  stopLoop() {
+    if (this.loopId) { clearInterval(this.loopId); this.loopId = null; }
+  },
+
+  playLobby() {
+    this.stopLoop();
+    if (this.muted || !this.ctx) return;
+    const mel  = [523,659,784,1047,784,659,523,440,523,659,784,880,784,659,784,523];
+    const bass = [131,131,165,196,196,165,131,110,131,131,165,220,220,165,196,131];
+    let i = 0;
+    const tick = () => {
+      if (this.muted) return;
+      this.note(mel[i % mel.length],  0, 0.22, 0.12, 'square');
+      this.note(bass[i % bass.length], 0, 0.22, 0.08, 'triangle');
+      i++;
+    };
+    tick();
+    this.loopId = setInterval(tick, 240);
+  },
+
+  playQuestion() {
+    this.stopLoop();
+    if (this.muted || !this.ctx) return;
+    const ticks = [880,784,880,784,880,784,698,659];
+    let i = 0;
+    const tick = () => {
+      if (this.muted) return;
+      this.note(ticks[i % ticks.length],   0, 0.08, 0.10, 'square');
+      this.note(ticks[i % ticks.length]/2, 0, 0.08, 0.05, 'triangle');
+      i++;
+    };
+    tick();
+    this.loopId = setInterval(tick, 900);
+  },
+
+  playUrgent() {
+    this.stopLoop();
+    if (this.muted || !this.ctx) return;
+    const ticks = [1047,988,1047,988];
+    let i = 0;
+    const tick = () => {
+      if (this.muted) return;
+      this.note(ticks[i % ticks.length], 0, 0.07, 0.13, 'square');
+      i++;
+    };
+    tick();
+    this.loopId = setInterval(tick, 400);
+  },
+
+  playCorrect() {
+    this.stopLoop();
+    [523,659,784,1047].forEach((f,i) => this.note(f, i*0.1, 0.15, 0.15, 'square'));
+  },
+
+  playWrong() {
+    this.stopLoop();
+    [220,196,165].forEach((f,i) => this.note(f, i*0.12, 0.18, 0.12, 'sawtooth'));
+  },
+
+  playLeaderboard() {
+    this.stopLoop();
+    const mel = [523,659,784,659,523,440,523,659,784,880,1047,880,784,659,784,523];
+    mel.forEach((f,i) => this.note(f, i*0.15, 0.18, 0.10, 'square'));
+  },
+
+  playFinal() {
+    this.stopLoop();
+    const notes = [523,523,523,415,622,523,415,622,523];
+    const durs  = [0.15,0.15,0.15,0.1,0.1,0.3,0.1,0.1,0.5];
+    let t = 0;
+    notes.forEach((f,i) => {
+      this.note(f,   t, durs[i], 0.18, 'square');
+      this.note(f/2, t, durs[i], 0.08, 'triangle');
+      t += durs[i] + 0.02;
+    });
+    const self = this;
+    setTimeout(function(){ self.playLobby(); }, (t + 0.5) * 1000);
+  },
+};
+
+window.toggleMute = function() {
+  Audio.muted = !Audio.muted;
+  document.getElementById('mute-btn').textContent = Audio.muted ? '🔇' : '🔊';
+  if (!Audio.muted) { Audio.init(); Audio.playLobby(); }
+  else Audio.stopLoop();
+};
+
+// ── DATA ──────────────────────────────────────────────────
+const AVATARS = [
+  {id:'daniel',  sprite:'🦁', bg:'#FAEEDA', border:'#BA7517', name:'다니엘',  tag:'사자굴에서도 기도했어요',    chipBg:'#FAEEDA', chipColor:'#633806'},
+  {id:'joseph',  sprite:'🌟', bg:'#EEEDFE', border:'#534AB7', name:'요셉',    tag:'꿈꾸는 자, 용서의 왕자',    chipBg:'#EEEDFE', chipColor:'#3C3489'},
+  {id:'esther',  sprite:'👑', bg:'#FBEAF0', border:'#D4537E', name:'에스더',  tag:'이때를 위함이 아닌지',      chipBg:'#FBEAF0', chipColor:'#72243E'},
+  {id:'david',   sprite:'🎯', bg:'#E1F5EE', border:'#1D9E75', name:'다윗',    tag:'골리앗을 이긴 목동왕',      chipBg:'#E1F5EE', chipColor:'#085041'},
+  {id:'ruth',    sprite:'🌾', bg:'#EAF3DE', border:'#639922', name:'룻',      tag:'어머니의 하나님이 내 하나님', chipBg:'#EAF3DE', chipColor:'#27500A'},
+  {id:'paul',    sprite:'✉️', bg:'#E6F1FB', border:'#378ADD', name:'바울',    tag:'내게 능력 주시는 자 안에서', chipBg:'#E6F1FB', chipColor:'#0C447C'},
+  {id:'moses',   sprite:'🔥', bg:'#FAECE7', border:'#D85A30', name:'모세',    tag:'홍해를 가른 지도자',        chipBg:'#FAECE7', chipColor:'#712B13'},
+  {id:'abraham', sprite:'⭐', bg:'#FAEEDA', border:'#BA7517', name:'아브라함', tag:'믿음의 조상',               chipBg:'#FAEEDA', chipColor:'#412402'},
+  {id:'noah',    sprite:'🌈', bg:'#E6F1FB', border:'#185FA5', name:'노아',    tag:'방주를 만든 의인',          chipBg:'#E6F1FB', chipColor:'#042C53'},
+  {id:'elijah',  sprite:'⚡', bg:'#EEEDFE', border:'#7F77DD', name:'엘리야',  tag:'불 병거를 탄 선지자',       chipBg:'#EEEDFE', chipColor:'#26215C'},
+  {id:'deborah', sprite:'🕊️',bg:'#FBEAF0', border:'#D4537E', name:'드보라',  tag:'이스라엘의 여선지자',       chipBg:'#FBEAF0', chipColor:'#4B1528'},
+  {id:'peter',   sprite:'🐟', bg:'#E1F5EE', border:'#1D9E75', name:'베드로',  tag:'반석 위에 세운 교회',       chipBg:'#E1F5EE', chipColor:'#04342C'},
+  {id:'john',    sprite:'💜', bg:'#EEEDFE', border:'#534AB7', name:'요한',    tag:'사랑받는 제자',             chipBg:'#EEEDFE', chipColor:'#3C3489'},
+  {id:'mary',    sprite:'🌸', bg:'#FBEAF0', border:'#D4537E', name:'마리아',  tag:'예수님의 어머니',           chipBg:'#FBEAF0', chipColor:'#72243E'},
+  {id:'solomon', sprite:'💎', bg:'#FAEEDA', border:'#BA7517', name:'솔로몬',  tag:'지혜의 왕',                chipBg:'#FAEEDA', chipColor:'#633806'},
+  {id:'gideon',  sprite:'🗡️',bg:'#EAF3DE', border:'#639922', name:'기드온',  tag:'300명으로 이긴 용사',       chipBg:'#EAF3DE', chipColor:'#173404'},
+];
+
+const QS = [
+  {q:'시편 24편 1절 — "땅과 거기 충만한 것과 세계와 그 안에 거하는 자들"의 주인은 누구인가요?', ref:'시편 24:1', bg:'#534AB7', nbg:'#EEEDFE', nc:'#534AB7', opts:['사람','여호와','왕','천사'], ans:1},
+  {q:'웨스트민스터 소요리문답 1문: 인생의 제일 되는 목적은 무엇인가요?', ref:'웨스트민스터 소요리문답', bg:'#0F6E56', nbg:'#E1F5EE', nc:'#0F6E56', opts:['행복하게 사는 것','성공하는 것','하나님을 영화롭게 하는 것','지식을 쌓는 것'], ans:2},
+  {q:'다니엘은 바벨론에서 무엇을 거절했나요?', ref:'다니엘 1:8', bg:'#BA7517', nbg:'#FAEEDA', nc:'#BA7517', opts:['왕의 음식과 포도주','왕의 옷','왕의 언어','왕의 이름'], ans:0},
+  {q:'골로새서 1:13에서 하나님은 우리를 어디서 건져내셨나요?', ref:'골로새서 1:13', bg:'#D4537E', nbg:'#FBEAF0', nc:'#D4537E', opts:['죄의 나라','흑암의 권세','사탄의 왕국','지옥'], ans:1},
+  {q:'전도서에서 솔로몬이 세상 모든 방식을 시도한 후 한 고백은?', ref:'전도서 1:2', bg:'#185FA5', nbg:'#E6F1FB', nc:'#185FA5', opts:['정말 행복하다','헛되고 헛되다','지혜가 최고다','돈이 전부다'], ans:1},
+  {q:'요셉이 형제들에게 보인 하나님의 방식은?', ref:'창세기 50:20', bg:'#3B6D11', nbg:'#EAF3DE', nc:'#3B6D11', opts:['복수','도망','용서와 섭리','침묵'], ans:2},
+  {q:'요한복음 16:33 — 예수님이 세상을 이기신 방법은?', ref:'요한복음 16:33', bg:'#534AB7', nbg:'#EEEDFE', nc:'#534AB7', opts:['강하시기 때문에','십자가와 부활로','군대가 있어서','천사들을 보내서'], ans:1},
+  {q:'"너희는 이 세대를 본받지 말고" — 다음에 오는 말씀은?', ref:'로마서 12:2', bg:'#D85A30', nbg:'#FAECE7', nc:'#D85A30', opts:['기도하라','오직 마음을 새롭게 함으로 변화를 받아','말씀을 읽어라','교회에 나가라'], ans:1},
+  {q:'에스더 4:14 — "이때를 위함이 아닌지"는 누가 한 말인가요?', ref:'에스더 4:14', bg:'#BA7517', nbg:'#FAEEDA', nc:'#BA7517', opts:['왕','에스더','모르드개','하만'], ans:2},
+  {q:'"전적 타락"(Total Depravity)의 바른 의미는?', ref:'예레미야 17:9', bg:'#0F6E56', nbg:'#E1F5EE', nc:'#0F6E56', opts:['인간이 완전히 악하다','죄가 인간의 모든 영역에 영향을 미친다','구원받을 수 없다','자유의지가 없다'], ans:1},
+];
+
+const ANS_COLORS = ['#D85A30','#185FA5','#0F6E56','#854F0B'];
+const ANS_SYMS   = ['▲','◆','●','★'];
+
+const G = { roomCode:null, myId:null, myName:null, myAvatar:null, isHost:false, curQ:0, answered:false, timerInt:null, unsubscribe:null, timeLeft:20 };
+
+// ── HELPERS ───────────────────────────────────────────────
+function uid() { return Math.random().toString(36).slice(2,8).toUpperCase(); }
+function avById(id) { return AVATARS.find(function(a){ return a.id===id; }); }
+
+function showS(id) {
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+}
+window.showS = showS;
+
+function renderChips(elId, players) {
+  const el = document.getElementById(elId);
+  const list = Object.values(players || {});
+  if (!list.length) { el.innerHTML = '<span style="color:#aaa;font-size:13px;">아직 없어요...</span>'; return; }
+  el.innerHTML = list.map(function(p){
+    return '<span class="chip" style="background:'+p.chipBg+';color:'+p.chipColor+';">'+p.sprite+' '+p.name+'</span>';
+  }).join('');
+}
+
+// ── AVATAR RENDER ─────────────────────────────────────────
+function renderAvatars() {
+  document.getElementById('av-grid').innerHTML = AVATARS.map(function(a){
+    return '<div class="av-card" id="av-'+a.id+'" onclick="pickAv(\''+a.id+'\')" style="border-color:'+a.border+'40;">'
+      +'<div class="av-sprite">'+a.sprite+'</div>'
+      +'<div class="av-name">'+a.name+'</div>'
+      +'<div class="av-tag">'+a.tag+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+window.pickAv = function(id) {
+  document.querySelectorAll('.av-card').forEach(function(c){ c.classList.remove('selected'); c.style.background=''; c.style.borderColor=''; });
+  const av = avById(id);
+  const el = document.getElementById('av-'+id);
+  el.classList.add('selected');
+  el.style.borderColor = av.border;
+  el.style.background  = av.bg;
+  G.myAvatar = id;
+};
+
+function renderDecos() {
+  document.getElementById('deco-row').innerHTML = [AVATARS[0],AVATARS[2],AVATARS[4],AVATARS[6]].map(function(a){
+    return '<div class="deco-av" style="background:'+a.bg+';border-color:'+a.border+'40;">'
+      +'<div style="font-size:28px;">'+a.sprite+'</div>'
+      +'<div style="font-size:11px;font-weight:700;color:#555;margin-top:4px;">'+a.name+'</div>'
+      +'</div>';
+  }).join('');
+}
+
+// ── HOST SETUP ────────────────────────────────────────────
+window.goHostSetup = async function() {
+  Audio.init(); Audio.playLobby();
+  const code = uid().slice(0,4);
+  G.roomCode = code; G.isHost = true;
+  document.getElementById('host-code').textContent = code;
+  try {
+    await set(ref(db,'rooms/'+code), { phase:'lobby', curQ:0, players:{} });
+  } catch (err) {
+    G.isHost = false; G.roomCode = null;
+    alert('방을 만들지 못했어요.\n\n' + (err && err.message ? err.message : err) +
+          '\n\n인터넷 연결과 Firebase 데이터베이스 설정(보안 규칙)을 확인해주세요.');
+    Audio.stopLoop();
+    return;
+  }
+  showS('s-host-setup');
+  listenRoom();
+};
+
+window.hostStart = async function() {
+  const roomRef = ref(db,'rooms/'+G.roomCode);
+  const snap = await get(roomRef);
+  const players = snap.exists() ? (snap.val().players || {}) : {};
+  await set(roomRef, { phase:'question', curQ:0, players:players, startedAt:Date.now() });
+  G.curQ = 0;
+  showQ(0);
+};
+
+// ── JOIN ──────────────────────────────────────────────────
+window.toAvatar = function() {
+  const code = document.getElementById('in-code').value.trim().toUpperCase();
+  const name = document.getElementById('in-name').value.trim();
+  if (!code || !name) { document.getElementById('join-error').innerHTML='<div class="error-box">방 코드와 이름을 입력해주세요!</div>'; return; }
+  document.getElementById('join-error').innerHTML='';
+  G.roomCode=code; G.myName=name; G.myId=uid();
+  showS('s-avatar');
+};
+
+window.joinRoom = async function() {
+  if (!G.myAvatar) { document.getElementById('avatar-error').innerHTML='<div class="error-box">캐릭터를 선택해주세요!</div>'; return; }
+  document.getElementById('avatar-error').innerHTML='';
+  const av = avById(G.myAvatar);
+  try {
+    const roomSnap = await get(ref(db,'rooms/'+G.roomCode));
+    if (!roomSnap.exists()) { document.getElementById('avatar-error').innerHTML='<div class="error-box">방을 찾을 수 없어요. 코드를 확인해주세요!</div>'; return; }
+    await update(ref(db,'rooms/'+G.roomCode+'/players/'+G.myId), {
+      id:G.myId, name:G.myName, avatar:G.myAvatar,
+      sprite:av.sprite, chipBg:av.chipBg, chipColor:av.chipColor, score:0
+    });
+  } catch (err) {
+    document.getElementById('avatar-error').innerHTML='<div class="error-box">연결 실패: '+(err && err.message ? err.message : err)+'</div>';
+    return;
+  }
+  document.getElementById('wait-sprite').textContent = av.sprite;
+  document.getElementById('wait-name').textContent   = G.myName+' ('+av.name+')';
+  Audio.init(); Audio.playLobby();
+  showS('s-wait');
+  listenRoom();
+};
+
+// ── ROOM LISTENER ─────────────────────────────────────────
+function listenRoom() {
+  if (G.unsubscribe) G.unsubscribe();
+  G.unsubscribe = onValue(ref(db,'rooms/'+G.roomCode), function(snap) {
+    if (!snap.exists()) return;
+    const room = snap.val();
+    if (G.isHost) {
+      renderChips('host-players', room.players);
+    } else if (document.getElementById('s-wait').classList.contains('active')) {
+      renderChips('wait-players', room.players);
+    }
+    if (!G.isHost) {
+      if (room.phase==='question' && room.curQ!==undefined) {
+        const onQ = document.getElementById('s-q').classList.contains('active');
+        if (!onQ || G.curQ !== room.curQ) { G.curQ=room.curQ; showQ(room.curQ); }
+      }
+      if (room.phase==='leaderboard' && !document.getElementById('s-lb').classList.contains('active')) {
+        showLB(room, false);
+      }
+      if (room.phase==='final' && !document.getElementById('s-final').classList.contains('active')) {
+        showFinal(room);
+      }
+    }
+  });
+}
+
+// ── QUESTION ──────────────────────────────────────────────
+function showQ(idx) {
+  G.curQ=idx; G.answered=false;
+  clearInterval(G.timerInt);
+  const q = QS[idx];
+  document.getElementById('q-num').textContent = '문제 '+(idx+1)+' / '+QS.length;
+  document.getElementById('q-num').style.cssText = 'background:'+q.nbg+';color:'+q.nc+';padding:4px 12px;border-radius:999px;display:inline-block;margin-bottom:10px;font-size:12px;font-weight:800;';
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-ref').textContent  = q.ref;
+  document.getElementById('q-header').style.background = q.bg;
+  document.getElementById('t-bar').style.background    = q.bg;
+  document.getElementById('ans-grid').innerHTML = q.opts.map(function(opt,i){
+    return '<button class="ans-btn" id="ab'+i+'" onclick="submitAns('+i+')" style="background:'+ANS_COLORS[i]+';">'
+      +'<span class="sym">'+ANS_SYMS[i]+'</span>'+opt+'</button>';
+  }).join('');
+  document.getElementById('fb-box').innerHTML = '';
+  showS('s-q');
+  startTimer(idx);
+}
+
+function startTimer(idx) {
+  G.timeLeft = 20;
+  const bar = document.getElementById('t-bar');
+  bar.style.width = '100%';
+  Audio.playQuestion();
+  G.timerInt = setInterval(function(){
+    G.timeLeft -= 0.1;
+    bar.style.width = Math.max(0,(G.timeLeft/20)*100)+'%';
+    if (G.timeLeft <= 5.0 && G.timeLeft > 4.9) Audio.playUrgent();
+    if (G.timeLeft <= 0) { clearInterval(G.timerInt); if (!G.answered) revealAns(idx,-1); }
+  }, 100);
+}
+
+window.submitAns = async function(idx) {
+  if (G.answered) return;
+  G.answered = true;
+  clearInterval(G.timerInt);
+  const q = QS[G.curQ];
+  const correct = idx === q.ans;
+  const pts = correct ? Math.round(500 + G.timeLeft*25) : 0;
+  revealAns(G.curQ, idx);
+  if (!G.isHost && G.myId) {
+    const cur = await get(ref(db,'rooms/'+G.roomCode+'/players/'+G.myId+'/score'));
+    const prev = cur.exists() ? (cur.val()||0) : 0;
+    await update(ref(db,'rooms/'+G.roomCode+'/players/'+G.myId), { score: prev+pts });
+  }
+  if (G.isHost) {
+    setTimeout(async function(){
+      const snap = await get(ref(db,'rooms/'+G.roomCode));
+      const room = snap.val();
+      const nq = G.curQ+1;
+      if (nq >= QS.length) {
+        await update(ref(db,'rooms/'+G.roomCode), { phase:'final' });
+        showFinal(room);
+      } else {
+        await update(ref(db,'rooms/'+G.roomCode), { phase:'leaderboard', nextQ:nq });
+        showLB(room, true, nq);
+      }
+    }, 2800);
+  }
+};
+
+function revealAns(idx, chosen) {
+  const q = QS[idx];
+  document.querySelectorAll('.ans-btn').forEach(function(b,i){
+    b.classList.add('disabled');
+    if (i===q.ans)    b.classList.add('correct');
+    else if (i===chosen) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('fb-box');
+  if (chosen===q.ans) {
+    Audio.playCorrect();
+    fb.innerHTML = '<div class="feedback-box" style="background:#EAF3DE;color:#27500A;">정답! +'+Math.round(500+G.timeLeft*25)+'점 🎉</div>';
+  } else if (chosen===-1) {
+    Audio.playWrong();
+    fb.innerHTML = '<div class="feedback-box" style="background:#FAEEDA;color:#633806;">시간 초과! ⏰</div>';
+  } else {
+    Audio.playWrong();
+    fb.innerHTML = '<div class="feedback-box" style="background:#FAECE7;color:#712B13;">틀렸어요... 😢</div>';
+  }
+}
+
+// ── LEADERBOARD ───────────────────────────────────────────
+function showLB(room, isHost, nextQ) {
+  Audio.playLeaderboard();
+  const players = Object.values(room.players||{}).sort(function(a,b){ return (b.score||0)-(a.score||0); });
+  document.getElementById('lb-sub').textContent = G.curQ+1+'문제 완료';
+  const medals  = ['🥇','🥈','🥉'];
+  const rowBgs  = ['#FAEEDA','#F1EFE8','#FAECE7'];
+  document.getElementById('lb-list').innerHTML = players.map(function(p,i){
+    return '<div class="lb-row" style="background:'+(rowBgs[i]||'#f9f9f9')+';">'
+      +'<span class="lb-rank">'+(medals[i]||(i+1))+'</span>'
+      +'<span class="lb-sprite">'+p.sprite+'</span>'
+      +'<span class="lb-name">'+p.name+'</span>'
+      +'<span class="lb-score">'+(p.score||0)+'점</span>'
+      +'</div>';
+  }).join('');
+  const btn = document.getElementById('lb-btn');
+  if (isHost) { btn.style.display='block'; btn.textContent='다음 문제 →'; btn.setAttribute('data-nq', nextQ); }
+  else btn.style.display='none';
+  showS('s-lb');
+}
+
+window.nextQ = async function() {
+  const nq = parseInt(document.getElementById('lb-btn').getAttribute('data-nq'));
+  await update(ref(db,'rooms/'+G.roomCode), { phase:'question', curQ:nq });
+  showQ(nq);
+};
+
+// ── FINAL ─────────────────────────────────────────────────
+function showFinal(room) {
+  clearInterval(G.timerInt);
+  Audio.playFinal();
+  const players = Object.values(room.players||{}).sort(function(a,b){ return (b.score||0)-(a.score||0); });
+  const order   = [1,0,2];
+  const heights = [90,130,70];
+  const blockBgs= ['#D3D1C7','#FAC775','#F5C4B3'];
+  document.getElementById('podium').innerHTML = order.map(function(i){
+    const p = players[i]; if(!p) return '';
+    return '<div class="pd-col">'
+      +'<div style="font-size:32px;">'+p.sprite+'</div>'
+      +'<div class="pd-name">'+p.name+'</div>'
+      +'<div class="pd-pts">'+(p.score||0)+'점</div>'
+      +'<div class="pd-block" style="height:'+heights[i]+'px;background:'+blockBgs[i]+';">'+['🥇','🥈','🥉'][i]+'</div>'
+      +'</div>';
+  }).join('');
+  const medals = ['🥇','🥈','🥉'];
+  const rowBgs = ['#FAEEDA','#F1EFE8','#FAECE7'];
+  document.getElementById('final-list').innerHTML = players.map(function(p,i){
+    return '<div class="lb-row" style="background:'+(rowBgs[i]||'#f9f9f9')+';">'
+      +'<span class="lb-rank">'+(medals[i]||(i+1))+'</span>'
+      +'<span class="lb-sprite">'+p.sprite+'</span>'
+      +'<span class="lb-name">'+p.name+'</span>'
+      +'<span class="lb-score">'+(p.score||0)+'점</span>'
+      +'</div>';
+  }).join('');
+  showS('s-final');
+}
+
+window.restart = function() {
+  clearInterval(G.timerInt);
+  Audio.stopLoop();
+  if (G.unsubscribe) G.unsubscribe();
+  G.roomCode=null; G.myId=null; G.myName=null; G.myAvatar=null;
+  G.isHost=false; G.curQ=0; G.answered=false;
+  document.querySelectorAll('.av-card').forEach(function(c){ c.classList.remove('selected'); c.style.background=''; c.style.borderColor=''; });
+  showS('s-role');
+};
+
+// ── INIT ──────────────────────────────────────────────────
+renderAvatars();
+renderDecos();
+</script>
+</body>
+</html>
